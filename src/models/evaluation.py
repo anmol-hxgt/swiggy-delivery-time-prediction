@@ -147,7 +147,7 @@ if __name__ == "__main__":
         # log model
         mlflow.sklearn.log_model(
     sk_model=model,
-    artifact_path="model",
+    artifact_path="delivery_time_pred_model",
     signature=model_signature
 )
 
