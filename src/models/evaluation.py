@@ -143,17 +143,36 @@ if __name__ == "__main__":
             model_input=X_train.sample(20, random_state=42),
             model_output=model.predict(X_train.sample(20, random_state=42))
         )
+        import tempfile,os
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_model_path = os.path.join(tmp_dir, "delivery_time_pred_model")
+        
+        # save model using mlflow locally
+        mlflow.sklearn.save_model(
+            sk_model=model,
+            path=tmp_model_path,
+            signature=model_signature
+        )
+        print("✅ Model saved locally to temp dir")
+        
+        # now upload the whole folder as artifact
+        mlflow.log_artifacts(
+            local_dir=tmp_model_path,
+            artifact_path="delivery_time_pred_model"
+        )
+        print("✅ Model folder uploaded to MLflow")
 
-        # log model
-        mlflow.sklearn.log_model(
-    sk_model=model,
-    artifact_path="delivery_time_pred_model",
-    signature=model_signature
-)
+    # your existing artifact logging (keep as is)
+    #mlflow.log_artifact(str(root_path / "models" / "stacking_regressor.joblib"))
+    #mlflow.log_artifact(str(root_path / "models" / "power_transformer.joblib"))
+    #mlflow.log_artifact(str(root_path / "models" / "preprocessor.joblib"))
 
-        # log additional artifacts
-        mlflow.log_artifact(root_path / "models" / "stacking_regressor.joblib")
-        mlflow.log_artifact(root_path / "models" / "power_transformer.joblib")
-        mlflow.log_artifact(root_path / "models" / "preprocessor.joblib")
+        # WRONG - Path object can cause issues
+#mlflow.log_artifact(root_path / "models" / "stacking_regressor.joblib")
+
+# CORRECT - convert to string
+        mlflow.log_artifact(str(root_path / "models" / "stacking_regressor.joblib"))
+        mlflow.log_artifact(str(root_path / "models" / "power_transformer.joblib"))
+        mlflow.log_artifact(str(root_path / "models" / "preprocessor.joblib"))
 
         logger.info("MLflow logging complete")

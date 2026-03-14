@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-"""columns_to_drop =  ['rider_id',
+columns_to_drop =  ['rider_id',
                     'restaurant_latitude',
                     'restaurant_longitude',
                     'delivery_latitude',
@@ -12,7 +12,7 @@ import pandas as pd
                     "order_day",
                     "city_name",
                     "order_day_of_week",
-                    "order_month"]"""
+                    "order_month"]
 
 
 def change_column_names(data: pd.DataFrame):
@@ -146,9 +146,9 @@ def time_of_day(ser):
     )
 
 
-"""def drop_columns(data: pd.DataFrame, columns: list) -> pd.DataFrame:
+def drop_columns(data: pd.DataFrame, columns: list) -> pd.DataFrame:
     df = data.drop(columns=columns)
-    return df"""
+    return df
 
 
 def calculate_haversine_distance(df):
@@ -196,7 +196,7 @@ def perform_data_cleaning(data: pd.DataFrame ,save_path="swiggy_cleaned.csv"):
         .pipe(clean_lat_long)
         .pipe(calculate_haversine_distance)
         .pipe(create_distance_type)
-        #.pipe(drop_columns,columns=columns_to_drop)
+        .pipe(drop_columns,columns=columns_to_drop)
     )
     
     cleaned_data.dropna()
