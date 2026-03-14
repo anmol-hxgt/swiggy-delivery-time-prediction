@@ -28,8 +28,8 @@ def change_column_names(data: pd.DataFrame):
             "time_order_picked": "order_picked_time",
             "weatherconditions": "weather",
             "road_traffic_density": "traffic",
-            "city": "city_type",
-            "time_taken(min)": "time_taken"},
+            "city": "city_type"},
+            #"time_taken(min)": "time_taken"},
             axis=1)
     )
 
@@ -45,7 +45,8 @@ def data_cleaning(data: pd.DataFrame):
         .drop(columns="id")
         .drop(index=minor_index)                                                # Minor riders in data dropped
         .drop(index=six_star_index)                                             # six star rated drivers dropped
-        .replace("NaN ",np.nan)                                                 # missing values in the data
+        .replace("NaN ",np.nan)       
+                                                  #.replace("NaN ", np.nan).infer_objects(copy=False)                                          # missing values in the data
         .assign(
             # city column out of rider id
             city_name = lambda x: x['rider_id'].str.split("RES").str.get(0),
@@ -93,13 +94,14 @@ def data_cleaning(data: pd.DataFrame):
             type_of_order = lambda x: x['type_of_order'].str.rstrip().str.lower(),
             type_of_vehicle = lambda x: x['type_of_vehicle'].str.rstrip().str.lower(),
             festival = lambda x: x['festival'].str.rstrip().str.lower(),
-            city_type = lambda x: x['city_type'].str.rstrip().str.lower(),
+            #city_type = lambda x: x['city_type'].str.rstrip().str.lower(),
+            city_type = lambda x: x['city_type'].astype(str).str.rstrip().str.lower(),
             # multiple deliveries column
-            multiple_deliveries = lambda x: x['multiple_deliveries'].astype(float),
+            multiple_deliveries = lambda x: x['multiple_deliveries'].astype(float))
             # target column modifications
-            time_taken = lambda x: (x['time_taken'] 
-                                    .str.replace("(min) ","")
-                                    .astype(int)))
+            # time_taken = lambda x: (x['time_taken']
+            #                         .str.replace("(min) ","")
+            #                         .astype(int)))
         .drop(columns=["order_time","order_picked_time"])
     )
     
@@ -187,7 +189,7 @@ def create_distance_type(data: pd.DataFrame):
     ))
 
 
-def perform_data_cleaning(data: pd.DataFrame ,save_path="swiggy_cleaned.csv"):
+def perform_data_cleaning(data: pd.DataFrame):
     
     cleaned_data = (
         data
@@ -199,10 +201,7 @@ def perform_data_cleaning(data: pd.DataFrame ,save_path="swiggy_cleaned.csv"):
         .pipe(drop_columns,columns=columns_to_drop)
     )
     
-    cleaned_data.dropna()
-    cleaned_data.to_csv(save_path, index=False)
-
-    return cleaned_data
+    return cleaned_data.dropna()
     
     
 

@@ -1,17 +1,13 @@
 import os
 os.environ["MLFLOW_TRACKING_USERNAME"] = "anmol-hxgt"
 os.environ["MLFLOW_TRACKING_PASSWORD"] = "41716882be228c494f83e28f51ea10efea8501ed"
+
 from fastapi import FastAPI
 from pydantic import BaseModel
-from sklearn.pipeline import Pipeline
 import uvicorn
 import pandas as pd
-
-
-
 import mlflow
 import joblib
-from mlflow import MlflowClient
 from sklearn import set_config
 
 from scripts.data_clean_utils import perform_data_cleaning
@@ -38,7 +34,6 @@ mlflow.set_tracking_uri(
 # ----------------------------
 
 class Data(BaseModel):
-
     ID: str
     Delivery_person_ID: str
     Delivery_person_Age: str
@@ -65,14 +60,9 @@ class Data(BaseModel):
 # ----------------------------
 
 MODEL_NAME = "delivery_time_pred_model"
-
-# use staging for now
 STAGE = "Staging"
-
 model_path = f"models:/{MODEL_NAME}/{STAGE}"
 
-#model = mlflow.sklearn.load_model(model_path)
-#model = mlflow.pyfunc.load_model(model_path)
 try:
     model = mlflow.pyfunc.load_model(model_path)
     print("Model loaded from MLflow registry")
@@ -83,17 +73,10 @@ except Exception as e:
 
 
 # ----------------------------
-# Load preprocessing pipeline
+# Load preprocessor
 # ----------------------------
 
 preprocessor = joblib.load("models/preprocessor.joblib")
-
-model_pipe = Pipeline(
-    steps=[
-        ("preprocess", preprocessor),
-        ("regressor", model),
-    ]
-)
 
 
 # ----------------------------
@@ -136,11 +119,21 @@ def do_predictions(data: Data):
         index=[0],
     )
 
-    # clean raw input
+    # step 1: clean raw input
     cleaned_data = perform_data_cleaning(pred_data)
+    print("cleaned_data shape:", cleaned_data.shape)
+    print("cleaned_data columns:", cleaned_data.columns.tolist())
+    print("cleaned_data values:\n", cleaned_data)
 
-    # predict
-    prediction = model_pipe.predict(cleaned_data)[0]
+    # step 2: preprocess
+    preprocessed = preprocessor.transform(cleaned_data)
+    feature_names = preprocessor.get_feature_names_out()
+    preprocessed_df = pd.DataFrame(preprocessed, columns=feature_names)
+    preprocessed_df['vehicle_condition'] = preprocessed_df['vehicle_condition'].astype('int64')
+
+
+    # step 3: predict
+    prediction = model.predict(preprocessed_df)[0]
 
     return {"delivery_time_prediction": float(prediction)}
 
