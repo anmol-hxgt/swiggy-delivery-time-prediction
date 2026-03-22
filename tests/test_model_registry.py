@@ -25,7 +25,7 @@ MODEL_NAME = "delivery_time_pred_model"
 
 @pytest.mark.parametrize(
     "model_name, stage",
-    [(MODEL_NAME, "Staging")]
+    [(MODEL_NAME, "Production")]
 )
 def test_load_model_from_registry(model_name, stage):
 
