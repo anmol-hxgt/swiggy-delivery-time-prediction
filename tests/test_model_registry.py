@@ -3,6 +3,10 @@ import mlflow
 from mlflow import MlflowClient
 import dagshub
 
+import os
+os.environ["MLFLOW_TRACKING_USERNAME"] = "anmol-hxgt"
+os.environ["MLFLOW_TRACKING_PASSWORD"] = "41716882be228c494f83e28f51ea10efea8501ed"
+
 # initialize dagshub
 dagshub.init(
     repo_owner="anmol-hxgt",
@@ -33,18 +37,25 @@ def test_load_model_from_registry(model_name, stage):
         stages=[stage]
     )
 
-    latest_version = latest_versions[0].version if latest_versions else None
+    assert len(latest_versions) > 0, f"No model found in {stage} stage"
 
-    assert latest_version is not None, f"No model found in {stage} stage"
+    latest_version = latest_versions[0]
+
+    # verify artifacts exist before loading
+    run_id = latest_version.run_id
+    artifacts = client.list_artifacts(run_id, "delivery_time_pred_model")
+    assert len(artifacts) > 0, (
+        f"No artifacts found for run {run_id}. "
+        f"Re-run evaluate.py and register_model.py to upload fresh artifacts."
+    )
 
     # load model
-    model_path = f"models:/{model_name}/{stage}"
-
-    model = mlflow.pyfunc.load_model(model_path)
+    model_uri = f"runs:/{run_id}/delivery_time_pred_model"
+    model = mlflow.pyfunc.load_model(model_uri)
 
     assert model is not None, "Failed to load model from registry"
 
     print(
-        f"Model '{model_name}' version {latest_version} "
+        f"Model '{model_name}' version {latest_version.version} "
         f"loaded successfully from {stage} stage"
     )
