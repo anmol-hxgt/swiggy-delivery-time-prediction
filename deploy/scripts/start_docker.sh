@@ -21,7 +21,7 @@ fi
 
 echo "Starting new container..."
 docker run -d -p 80:8000 --name delivery_time_pred \
-  -e DAGSHUB_USER_TOKEN=$DAGSHUB_USER_TOKEN \
+  -e DAGSHUB_USER_TOKEN=41716882be228c494f83e28f51ea10efea8501ed \
   919739340842.dkr.ecr.eu-north-1.amazonaws.com/swiggy-delivery:latest
 
 echo "Container started successfully."
