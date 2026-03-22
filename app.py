@@ -60,7 +60,7 @@ class Data(BaseModel):
 # ----------------------------
 
 MODEL_NAME = "delivery_time_pred_model"
-STAGE = "Staging"
+STAGE = "Production"
 model_path = f"models:/{MODEL_NAME}/{STAGE}"
 
 try:
