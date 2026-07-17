@@ -79,19 +79,19 @@ jobs:
             zip -r deployment.zip appspec.yml deploy/scripts/install_dependencies.sh deploy/scripts/start_docker.sh
 
       # Upload the ZIP file to S3
-      #- name: Upload ZIP to S3
-      #  if: success()
-      #  run: |
-      #      aws s3 cp deployment.zip s3://swiggy-dt-deploy-anmol/deployment.zip
+      - name: Upload ZIP to S3
+        if: success()
+        run: |
+            aws s3 cp deployment.zip s3://swiggy-dt-deploy-anmol/deployment.zip
 
-      # Deploy to AWS CodeDeploy using the uploaded ZIP file
-      #- name: Deploy to AWS CodeDeploy
-      #  if: success()
-      #  run: |
-      #      aws deploy create-deployment \
-      #      --application-name deliverytimeprediction \
-      #      --deployment-config-name CodeDeployDefault.OneAtATime \
-      #      --deployment-group-name deliverytimepredictiondeploymentgroup \
-      #      --s3-location bucket=swiggy-dt-deploy-anmol,key=deployment.zip,bundleType=zip \
-      #      --file-exists-behavior OVERWRITE \
-      #      --region eu-north-1
+        #Deploy to AWS CodeDeploy using the uploaded ZIP file
+      - name: Deploy to AWS CodeDeploy
+        if: success()
+        run: |
+            aws deploy create-deployment \
+            --application-name deliverytimeprediction \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name deliverytimepredictiondeploymentgroup \
+            --s3-location bucket=swiggy-dt-deploy-anmol,key=deployment.zip,bundleType=zip \
+            --file-exists-behavior OVERWRITE \
+            --region eu-north-1
